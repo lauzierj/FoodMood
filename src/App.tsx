@@ -5,9 +5,13 @@ import { HiCalendar, HiChartBar } from "react-icons/hi";
 import TodayPage from "./pages/TodayPage";
 import ChartsPage from "./pages/ChartsPage";
 import SettingsPage from "./pages/SettingsPage";
+import { useBuildInfoPolling } from "./hooks/useBuildInfoPolling";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"today" | "charts" | "settings">("today");
+  
+  // Poll for build info updates every 30 seconds
+  useBuildInfoPolling();
 
   return (
     <Box minH="100vh" bg="gray.900" position="relative" pb="100px">
