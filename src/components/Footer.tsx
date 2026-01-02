@@ -25,7 +25,7 @@ export default function Footer() {
   if (!buildInfo) return null;
 
   return (
-    <Box as="footer" mt="auto" py={4} borderTop="1px" borderColor="gray.200">
+    <Box as="footer" mt={8} py={4} borderTop="1px" borderColor="gray.700">
       <Container maxW="container.lg">
         <Text fontSize="xs" color="gray.500" textAlign="center">
           Built: {buildInfo.date}

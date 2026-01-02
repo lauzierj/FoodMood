@@ -20,9 +20,36 @@ const customConfig = defineConfig({
     },
   },
   globalCss: {
+    html: {
+      height: '100%',
+    },
     body: {
       bg: 'gray.900',
       color: 'gray.100',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
+      margin: 0,
+      padding: 0,
+      minHeight: '100vh',
+      WebkitOverflowScrolling: 'touch',
+      touchAction: 'pan-y',
+    },
+    '#root': {
+      minHeight: '100vh',
+    },
+    '*': {
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      MozUserSelect: 'none',
+      msUserSelect: 'none',
+    },
+    'input, textarea': {
+      userSelect: 'text',
+      WebkitUserSelect: 'text',
+      MozUserSelect: 'text',
+      msUserSelect: 'text',
     },
   },
 });
