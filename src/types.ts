@@ -49,15 +49,15 @@ export const FOOD_EMOJIS: Record<FoodCategory, string> = {
   vegetables: "🥦",
   meat: "🥩",
   carbs: "🍞",
-  sweet: "🍪",
+  sweet: "🍦",
   salty: "🥨",
 };
 
 export const ACTIVITY_EMOJIS: Record<ActivityType, string> = {
-  screens: "📺",
+  screens: "📱",
   dance: "💃",
-  school: "🏫",
-  outside: "🌳",
+  school: "🚌",
+  outside: "🛝",
   toys: "🧸",
   arts: "🎨",
 };

@@ -51,6 +51,13 @@ const customConfig = defineConfig({
       MozUserSelect: 'text',
       msUserSelect: 'text',
     },
+    // Ensure Recharts axis tick text is visible in dark mode
+    '.recharts-yAxis .recharts-cartesian-axis-tick text': {
+      fill: '#edf2f7 !important',
+    },
+    '.recharts-xAxis .recharts-cartesian-axis-tick text': {
+      fill: '#edf2f7 !important',
+    },
   },
 });
 

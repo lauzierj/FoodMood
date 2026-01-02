@@ -31,6 +31,9 @@ import {
   FOOD_LABELS,
   ACTIVITY_LABELS,
   MOOD_LABELS,
+  FOOD_EMOJIS,
+  ACTIVITY_EMOJIS,
+  MOOD_EMOJIS,
   FoodCategory,
   ActivityType,
   Emotion,
@@ -100,9 +103,10 @@ export default function ChartsPage() {
     });
 
     return Object.entries(totals).map(([category, count]) => ({
-      name: FOOD_LABELS[category as FoodCategory],
+      name: FOOD_EMOJIS[category as FoodCategory],
       value: count,
-      emoji: category,
+      emoji: FOOD_EMOJIS[category as FoodCategory],
+      category: category as FoodCategory,
     }));
   }, [entries]);
 
@@ -123,8 +127,10 @@ export default function ChartsPage() {
     });
 
     return Object.entries(totals).map(([type, count]) => ({
-      name: ACTIVITY_LABELS[type as ActivityType],
+      name: ACTIVITY_EMOJIS[type as ActivityType],
       value: count,
+      emoji: ACTIVITY_EMOJIS[type as ActivityType],
+      type: type as ActivityType,
     }));
   }, [entries]);
 
@@ -149,8 +155,10 @@ export default function ChartsPage() {
     return Object.entries(totals)
       .filter(([_, count]) => count > 0)
       .map(([emotion, count]) => ({
-        name: MOOD_LABELS[emotion as Emotion],
+        name: MOOD_EMOJIS[emotion as Emotion],
         value: count,
+        emoji: MOOD_EMOJIS[emotion as Emotion],
+        emotion: emotion as Emotion,
       }));
   }, [entries]);
 
@@ -183,6 +191,102 @@ export default function ChartsPage() {
         date: format(parseISO(date), "MMM d"),
         ...moods,
       }));
+  }, [entries]);
+
+  // Correlation: Food vs Happy mood
+  const foodHappinessCorrelation = React.useMemo(() => {
+    const correlations: Array<{ food: string; emoji: string; happiness: number }> = [];
+    
+    Object.entries(FOOD_EMOJIS).forEach(([category, emoji]) => {
+      let daysWithFood = 0;
+      let totalHappiness = 0;
+
+      entries.forEach((entry) => {
+        const foodCount = entry.foods.find(f => f.category === category)?.count || 0;
+        const happiness = entry.moods.find(m => m.emotion === "happy")?.count || 0;
+        
+        if (foodCount > 0) {
+          daysWithFood++;
+          totalHappiness += happiness;
+        }
+      });
+
+      if (daysWithFood > 0) {
+        correlations.push({
+          food: emoji,
+          emoji: emoji,
+          happiness: totalHappiness / daysWithFood,
+        });
+      }
+    });
+
+    return correlations.sort((a, b) => b.happiness - a.happiness);
+  }, [entries]);
+
+  // Correlation: Activity vs Happy mood
+  const activityHappinessCorrelation = React.useMemo(() => {
+    const correlations: Array<{ activity: string; emoji: string; happiness: number }> = [];
+    
+    Object.entries(ACTIVITY_EMOJIS).forEach(([type, emoji]) => {
+      let daysWithActivity = 0;
+      let totalHappiness = 0;
+
+      entries.forEach((entry) => {
+        const activityCount = entry.activities.find(a => a.type === type)?.count || 0;
+        const happiness = entry.moods.find(m => m.emotion === "happy")?.count || 0;
+        
+        if (activityCount > 0) {
+          daysWithActivity++;
+          totalHappiness += happiness;
+        }
+      });
+
+      if (daysWithActivity > 0) {
+        correlations.push({
+          activity: emoji,
+          emoji: emoji,
+          happiness: totalHappiness / daysWithActivity,
+        });
+      }
+    });
+
+    return correlations.sort((a, b) => b.happiness - a.happiness);
+  }, [entries]);
+
+  // Correlation: Snack foods vs Sleepy/Energy
+  const snackEnergyCorrelation = React.useMemo(() => {
+    const snackCategories: FoodCategory[] = ["sweet", "salty"];
+    const correlations: Array<{ snack: string; emoji: string; sleepy: number; energetic: number }> = [];
+    
+    snackCategories.forEach((category) => {
+      let daysWithSnack = 0;
+      let totalSleepy = 0;
+      let totalEnergetic = 0;
+
+      entries.forEach((entry) => {
+        const snackCount = entry.foods.find(f => f.category === category)?.count || 0;
+        const sleepy = entry.moods.find(m => m.emotion === "sleepy")?.count || 0;
+        const energetic = (entry.moods.find(m => m.emotion === "excited")?.count || 0) + 
+                         (entry.moods.find(m => m.emotion === "happy")?.count || 0);
+        
+        if (snackCount > 0) {
+          daysWithSnack++;
+          totalSleepy += sleepy;
+          totalEnergetic += energetic;
+        }
+      });
+
+      if (daysWithSnack > 0) {
+        correlations.push({
+          snack: FOOD_EMOJIS[category],
+          emoji: FOOD_EMOJIS[category],
+          sleepy: totalSleepy / daysWithSnack,
+          energetic: totalEnergetic / daysWithSnack,
+        });
+      }
+    });
+
+    return correlations;
   }, [entries]);
 
   if (loading) {
@@ -271,8 +375,16 @@ export default function ChartsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={moodTimeSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
-                <XAxis dataKey="date" stroke="gray.400" />
-                <YAxis stroke="gray.400" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "gray.800",
@@ -285,31 +397,31 @@ export default function ChartsPage() {
                   type="monotone"
                   dataKey="happy"
                   stroke="#82ca9d"
-                  name="Happy"
+                  name="😊 Happy"
                 />
                 <Line
                   type="monotone"
                   dataKey="excited"
                   stroke="#ffc658"
-                  name="Excited"
+                  name="🤩 Excited"
                 />
                 <Line
                   type="monotone"
                   dataKey="calm"
                   stroke="#8884d8"
-                  name="Calm"
+                  name="😌 Calm"
                 />
                 <Line
                   type="monotone"
                   dataKey="sleepy"
                   stroke="#8dd1e1"
-                  name="Sleepy"
+                  name="😴 Sleepy"
                 />
                 <Line
                   type="monotone"
                   dataKey="sad"
                   stroke="#8884d8"
-                  name="Sad"
+                  name="😢 Sad"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -325,8 +437,16 @@ export default function ChartsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={foodData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
-                <XAxis dataKey="name" stroke="gray.400" />
-                <YAxis stroke="gray.400" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="gray.100" 
+                  tick={{ fill: "gray.100" }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "gray.800",
@@ -349,8 +469,16 @@ export default function ChartsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={activityData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
-                <XAxis dataKey="name" stroke="gray.400" />
-                <YAxis stroke="gray.400" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="gray.100" 
+                  tick={{ fill: "gray.100" }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "gray.800",
@@ -377,8 +505,8 @@ export default function ChartsPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
+                  label={({ emoji, percent }) =>
+                    `${emoji} ${(percent * 100).toFixed(0)}%`
                   }
                   outerRadius={100}
                   fill="#8884d8"
@@ -399,6 +527,106 @@ export default function ChartsPage() {
                   }}
                 />
               </PieChart>
+            </ResponsiveContainer>
+          </Box>
+        )}
+
+        {/* Correlation: Food vs Happiness */}
+        {foodHappinessCorrelation.length > 0 && (
+          <Box bg="gray.800" p={6} borderRadius="lg">
+            <Text fontSize="xl" fontWeight="bold" color="gray.100" mb={4}>
+              🍎 Does Eating Right Foods Help You Be Happier? 😊
+            </Text>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={foodHappinessCorrelation}>
+                <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
+                <XAxis 
+                  dataKey="emoji" 
+                  stroke="gray.100" 
+                  tick={{ fill: "gray.100" }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "gray.800",
+                    border: "1px solid gray.700",
+                    color: "gray.100",
+                  }}
+                  formatter={(value: number) => [`${value.toFixed(1)} 😊`, "Average Happiness"]}
+                />
+                <Bar dataKey="happiness" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        )}
+
+        {/* Correlation: Activity vs Happiness */}
+        {activityHappinessCorrelation.length > 0 && (
+          <Box bg="gray.800" p={6} borderRadius="lg">
+            <Text fontSize="xl" fontWeight="bold" color="gray.100" mb={4}>
+              💃 Are You Happier When You Dance or Watch iPad? 😊
+            </Text>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={activityHappinessCorrelation}>
+                <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
+                <XAxis 
+                  dataKey="emoji" 
+                  stroke="gray.100" 
+                  tick={{ fill: "gray.100" }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "gray.800",
+                    border: "1px solid gray.700",
+                    color: "gray.100",
+                  }}
+                  formatter={(value: number) => [`${value.toFixed(1)} 😊`, "Average Happiness"]}
+                />
+                <Bar dataKey="happiness" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        )}
+
+        {/* Correlation: Snacks vs Energy */}
+        {snackEnergyCorrelation.length > 0 && (
+          <Box bg="gray.800" p={6} borderRadius="lg">
+            <Text fontSize="xl" fontWeight="bold" color="gray.100" mb={4}>
+              🍪 Does Eating Snacks Slow You Down? 😴
+            </Text>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={snackEnergyCorrelation}>
+                <CartesianGrid strokeDasharray="3 3" stroke="gray.700" />
+                <XAxis 
+                  dataKey="emoji" 
+                  stroke="gray.100" 
+                  tick={{ fill: "gray.100" }}
+                />
+                <YAxis 
+                  stroke="#edf2f7" 
+                  tick={{ fill: "#edf2f7", fontSize: 12 }}
+                  label={{ value: "", fill: "#edf2f7" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "gray.800",
+                    border: "1px solid gray.700",
+                    color: "gray.100",
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="sleepy" fill="#8dd1e1" name="😴 Sleepy" />
+                <Bar dataKey="energetic" fill="#82ca9d" name="⚡ Energetic" />
+              </BarChart>
             </ResponsiveContainer>
           </Box>
         )}
