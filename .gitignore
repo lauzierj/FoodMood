@@ -1,0 +1,5 @@
+node_modules/
+dist/
+public/recipes.json
+public/tags.json
+.playwright-mcp/
