@@ -274,144 +274,176 @@ export default function EmojiSelector({
         {title}
       </Text>
 
-      {/* Emoji buttons with badges */}
-      <HStack gap={3} flexWrap="wrap" justify="center">
-        {options.map((option) => {
-          const count = getSelectedCount(option.value);
-          const isHolding = holdingValue === option.value;
-          const shouldShowTimer = isHolding && showTimer;
+      {/* Emoji buttons with badges - horizontally scrollable */}
+      <Box
+        overflowX="auto"
+        overflowY="hidden"
+        mx="-16px"
+        css={{
+          "&::-webkit-scrollbar": {
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255, 255, 255, 0.2)",
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "rgba(255, 255, 255, 0.3)",
+          },
+        }}
+      >
+        <HStack
+          gap={3}
+          flexWrap="nowrap"
+          align="flex-start"
+          minW="max-content"
+          px="16px"
+          py="10px"
+        >
+          {options.map((option) => {
+            const count = getSelectedCount(option.value);
+            const isHolding = holdingValue === option.value;
+            const shouldShowTimer = isHolding && showTimer;
 
-          return (
-            <Box key={option.value} position="relative" display="inline-block">
-              <Button
-                onClick={(e) => handleClick(option.value, e)}
-                onMouseDown={(e) => handleMouseDown(option.value, e)}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
-                onContextMenu={handleContextMenu}
-                onTouchStart={(e) => handleTouchStart(option.value, e)}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchCancel}
-                size="lg"
-                fontSize="4xl"
-                p={4}
-                minW="80px"
-                h="80px"
-                bg={shouldShowTimer ? "red.800" : "gray.800"}
-                border="2px solid"
-                borderColor={
-                  shouldShowTimer
-                    ? "red.500"
-                    : count > 0
-                    ? "blue.500"
-                    : "gray.700"
-                }
-                _hover={{
-                  bg: shouldShowTimer ? "red.800" : "gray.700",
-                  borderColor: "blue.500",
-                }}
-                _active={{ bg: "gray.600" }}
-                aria-label={option.label}
-                disabled={isDisabled}
-                userSelect="none"
-                style={{ touchAction: "manipulation" }}
+            return (
+              <Box
+                key={option.value}
+                position="relative"
+                display="inline-block"
               >
-                {option.emoji}
-              </Button>
-              {count > 0 && (
-                <Badge
-                  position="absolute"
-                  top="-8px"
-                  right="-8px"
-                  bg="blue.600"
-                  color="white"
-                  borderRadius="full"
-                  minW="24px"
-                  h="24px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  fontSize="xs"
-                  fontWeight="bold"
-                  cursor="pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove(option.value);
+                <Button
+                  onClick={(e) => handleClick(option.value, e)}
+                  onMouseDown={(e) => handleMouseDown(option.value, e)}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseLeave}
+                  onContextMenu={handleContextMenu}
+                  onTouchStart={(e) => handleTouchStart(option.value, e)}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchCancel={handleTouchCancel}
+                  size="lg"
+                  fontSize="4xl"
+                  p={4}
+                  minW="80px"
+                  h="80px"
+                  bg={shouldShowTimer ? "red.800" : "gray.800"}
+                  border="2px solid"
+                  borderColor={
+                    shouldShowTimer
+                      ? "red.500"
+                      : count > 0
+                      ? "blue.500"
+                      : "gray.700"
+                  }
+                  _hover={{
+                    bg: shouldShowTimer ? "red.800" : "gray.700",
+                    borderColor: "blue.500",
                   }}
-                  _hover={{ bg: "blue.700" }}
-                  zIndex={1}
+                  _active={{ bg: "gray.600" }}
+                  aria-label={option.label}
+                  disabled={isDisabled}
+                  userSelect="none"
+                  style={{ touchAction: "manipulation" }}
                 >
-                  {count}
-                </Badge>
-              )}
-              {/* Timer overlay with down arrow icon */}
-              {shouldShowTimer && (
-                <Box
-                  position="absolute"
-                  top="50%"
-                  left="50%"
-                  transform="translate(-50%, -50%)"
-                  w="60px"
-                  h="60px"
-                  borderRadius="full"
-                  bg="rgba(0, 0, 0, 0.9)"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  zIndex={10}
-                  pointerEvents="none"
-                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
-                >
-                  {/* Circular progress indicator using SVG */}
+                  {option.emoji}
+                </Button>
+                {count > 0 && (
+                  <Badge
+                    position="absolute"
+                    top="-8px"
+                    right="-8px"
+                    bg="blue.600"
+                    color="white"
+                    borderRadius="full"
+                    minW="24px"
+                    h="24px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    fontSize="xs"
+                    fontWeight="bold"
+                    cursor="pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(option.value);
+                    }}
+                    _hover={{ bg: "blue.700" }}
+                    zIndex={1}
+                  >
+                    {count}
+                  </Badge>
+                )}
+                {/* Timer overlay with down arrow icon */}
+                {shouldShowTimer && (
                   <Box
                     position="absolute"
+                    top="50%"
+                    left="50%"
+                    transform="translate(-50%, -50%)"
                     w="60px"
                     h="60px"
                     borderRadius="full"
-                    overflow="hidden"
+                    bg="rgba(0, 0, 0, 0.9)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    zIndex={10}
+                    pointerEvents="none"
+                    boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                   >
-                    <svg
-                      width="60"
-                      height="60"
-                      style={{ transform: "rotate(-90deg)" }}
+                    {/* Circular progress indicator using SVG */}
+                    <Box
+                      position="absolute"
+                      w="60px"
+                      h="60px"
+                      borderRadius="full"
+                      overflow="hidden"
                     >
-                      <circle
-                        cx="30"
-                        cy="30"
-                        r="27"
-                        fill="none"
-                        stroke="rgba(239, 68, 68, 0.3)"
-                        strokeWidth="4"
-                      />
-                      <circle
-                        cx="30"
-                        cy="30"
-                        r="27"
-                        fill="none"
-                        stroke="#ef4444"
-                        strokeWidth="4"
-                        strokeDasharray={`${2 * Math.PI * 27}`}
-                        strokeDashoffset={`${
-                          2 * Math.PI * 27 * (1 - holdProgress)
-                        }`}
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                      <svg
+                        width="60"
+                        height="60"
+                        style={{ transform: "rotate(-90deg)" }}
+                      >
+                        <circle
+                          cx="30"
+                          cy="30"
+                          r="27"
+                          fill="none"
+                          stroke="rgba(239, 68, 68, 0.3)"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx="30"
+                          cy="30"
+                          r="27"
+                          fill="none"
+                          stroke="#ef4444"
+                          strokeWidth="4"
+                          strokeDasharray={`${2 * Math.PI * 27}`}
+                          strokeDashoffset={`${
+                            2 * Math.PI * 27 * (1 - holdProgress)
+                          }`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </Box>
+                    {/* Down arrow icon */}
+                    <Box
+                      as={FaArrowDown}
+                      color="red.400"
+                      fontSize="20px"
+                      position="relative"
+                      zIndex={11}
+                    />
                   </Box>
-                  {/* Down arrow icon */}
-                  <Box
-                    as={FaArrowDown}
-                    color="red.400"
-                    fontSize="20px"
-                    position="relative"
-                    zIndex={11}
-                  />
-                </Box>
-              )}
-            </Box>
-          );
-        })}
-      </HStack>
+                )}
+              </Box>
+            );
+          })}
+        </HStack>
+      </Box>
     </VStack>
   );
 }
