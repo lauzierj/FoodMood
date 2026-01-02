@@ -10,6 +10,7 @@ export default defineConfig({
       base: "/FoodMood/",
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+      manifestFilename: "manifest.webmanifest",
       manifest: {
         name: "FoodMood",
         short_name: "FoodMood",
