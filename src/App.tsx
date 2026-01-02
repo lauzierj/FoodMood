@@ -7,12 +7,27 @@ import TodayPage from "./pages/TodayPage";
 import ChartsPage from "./pages/ChartsPage";
 import SettingsPage from "./pages/SettingsPage";
 import { useBuildInfoPolling } from "./hooks/useBuildInfoPolling";
+import { usePullToRefresh } from "./hooks/usePullToRefresh";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"today" | "charts" | "settings">("today");
   
   // Poll for build info updates every 30 seconds
   useBuildInfoPolling();
+
+  // Check if running as PWA (standalone mode)
+  const isPWA = window.matchMedia("(display-mode: standalone)").matches || 
+                (window.navigator as any).standalone === true ||
+                document.referrer.includes("android-app://");
+
+  // Pull to refresh - only enable in PWA mode, just reload the page
+  usePullToRefresh({
+    onRefresh: () => {
+      window.location.reload();
+    },
+    enabled: isPWA,
+    threshold: 80,
+  });
 
   return (
     <Box minH="100vh" bg="gray.900" position="relative" pb="100px">

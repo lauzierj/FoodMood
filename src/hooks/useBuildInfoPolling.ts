@@ -9,6 +9,28 @@ export function useBuildInfoPolling() {
   const initialTimestampRef = useRef<string | null>(null);
   const pollingIntervalRef = useRef<number | null>(null);
 
+  const checkForUpdates = async (): Promise<boolean> => {
+    const base = import.meta.env.BASE_URL;
+    const getBuildInfoUrl = () => `${base}build-info.json?t=${Date.now()}`;
+
+    try {
+      const response = await fetch(getBuildInfoUrl(), { cache: "no-store" });
+      const info: BuildInfo = await response.json();
+      
+      // If we have an initial timestamp and it's different, reload
+      if (
+        initialTimestampRef.current &&
+        info.timestamp !== initialTimestampRef.current
+      ) {
+        window.location.reload();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
     const getBuildInfoUrl = () => `${base}build-info.json?t=${Date.now()}`;
@@ -26,20 +48,7 @@ export function useBuildInfoPolling() {
 
     // Poll every 30 seconds
     pollingIntervalRef.current = window.setInterval(() => {
-      fetch(getBuildInfoUrl(), { cache: "no-store" })
-        .then((r) => r.json())
-        .then((info: BuildInfo) => {
-          // If we have an initial timestamp and it's different, reload
-          if (
-            initialTimestampRef.current &&
-            info.timestamp !== initialTimestampRef.current
-          ) {
-            window.location.reload();
-          }
-        })
-        .catch(() => {
-          // Silently fail - might be in development or network issue
-        });
+      checkForUpdates();
     }, 30000); // 30 seconds
 
     // Cleanup on unmount
@@ -49,5 +58,7 @@ export function useBuildInfoPolling() {
       }
     };
   }, []);
+
+  return { checkForUpdates };
 }
 

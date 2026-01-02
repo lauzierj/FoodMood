@@ -35,6 +35,7 @@ const customConfig = defineConfig({
       minHeight: '100vh',
       WebkitOverflowScrolling: 'touch',
       touchAction: 'pan-y',
+      overscrollBehaviorY: 'contain', // Prevent overscroll bounce for pull-to-refresh
     },
     '#root': {
       minHeight: '100vh',
