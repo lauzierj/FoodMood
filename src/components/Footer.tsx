@@ -11,7 +11,7 @@ export default function Footer() {
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
-    fetch(`${base}build-info.json`)
+    fetch(`${base}build-info.json?t=${Date.now()}`, { cache: "no-store" })
       .then(r => r.json())
       .then((info: BuildInfo) => setBuildInfo(info))
       .catch(() => {

@@ -11,10 +11,10 @@ export function useBuildInfoPolling() {
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
-    const buildInfoUrl = `${base}build-info.json`;
+    const getBuildInfoUrl = () => `${base}build-info.json?t=${Date.now()}`;
 
     // Fetch initial build info
-    fetch(buildInfoUrl)
+    fetch(getBuildInfoUrl())
       .then((r) => r.json())
       .then((info: BuildInfo) => {
         initialTimestampRef.current = info.timestamp;
@@ -26,7 +26,7 @@ export function useBuildInfoPolling() {
 
     // Poll every 30 seconds
     pollingIntervalRef.current = window.setInterval(() => {
-      fetch(buildInfoUrl, { cache: "no-store" })
+      fetch(getBuildInfoUrl(), { cache: "no-store" })
         .then((r) => r.json())
         .then((info: BuildInfo) => {
           // If we have an initial timestamp and it's different, reload
